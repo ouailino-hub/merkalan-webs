@@ -1,0 +1,23 @@
+# Va en el repositorio público merkalan-webs. Ejecuta las pruebas de cada app que sube la IA.
+name: pruebas-apps
+on:
+  push:
+    branches: [main]
+    paths: ['apps/**']
+permissions:
+  contents: read
+jobs:
+  pruebas:
+    if: startsWith(github.event.head_commit.message, 'app-pruebas ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Pruebas automáticas
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          ID=$(printf '%s' "$MSG" | grep -oE 'a-[A-Za-z0-9_-]{4,40}' | head -1)
+          node "apps/$ID/test.js"
